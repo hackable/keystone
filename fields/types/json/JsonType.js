@@ -2,6 +2,7 @@ var assign = require('object-assign');
 var FieldType = require('../Type');
 var TextType = require('../text/TextType');
 var util = require('util');
+var utils = require('keystone-utils');
 
 
 /**
@@ -26,31 +27,18 @@ util.inherits(json, FieldType);
 json.prototype.addFilterToQuery = TextType.prototype.addFilterToQuery;
 
 
-json.prototype.validateInput = function (data, required, item) {
-	var value = this.getValueFromData(data);
+json.prototype.validateInput = function (data, callback) {
+	var input = this.getValueFromData(data);
+	var result = true;
 
-	if (value === undefined && item && (item.get(this.path) || item.get(this.path) === 0)) {
-		return true;
-	}
-
-	if (value == null && required) {
-		return false;
-	} else if (value == null && !required) {
-		return true;
+	if (input === undefined || input === null ) {
+		result = true;
 	} else {
-		try {
-			value = this.getValueFromData(data, true);
-
-			if (typeof value !== 'object') {
-				return false;
-			} else {
-				return true;
-			}
-		} catch (ex) {
-			return false;
-		}
+		 if (typeof input !== 'object') { result = false }
 	}
+	utils.defer(callback, result);
 };
+
 
 /* Export Field Type */
 module.exports = json;
